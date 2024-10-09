@@ -27,7 +27,7 @@ def get_libros():
         result.append({
             'ID_libro': row[0],
             'Título': row[1],
-            'Autor': row[2],
+            'ID_autor': row[2],
             'ISBN': row[3],
             'Género': row[4],
             'Fecha_publicación': str(row[5]),
@@ -48,7 +48,7 @@ def get_libro(id):
         result = {
             'ID_libro': libro[0],
             'Título': libro[1],
-            'Autor': libro[2],
+            'ID_autor': libro[2],
             'ISBN': libro[3],
             'Género': libro[4],
             'Fecha_publicación': str(libro[5]),
@@ -67,14 +67,15 @@ def create_libro():
     try:
         data = request.get_json()
 
-        if not data or not all(key in data for key in ('Título', 'Autor', 'ISBN', 'Género', 'Fecha_publicación', 'Número_páginas', 'Editorial', 'Idioma', 'Resumen', 'Disponibilidad')):
+        # Validar la entrada
+        if not data or not all(key in data for key in ('Título', 'ID_autor', 'ISBN', 'Género', 'Fecha_publicación', 'Número_páginas', 'Editorial', 'Idioma', 'Resumen', 'Disponibilidad')):
             return jsonify({"error": "Todos los campos son obligatorios"}), 400
 
         query = """
-        INSERT INTO Libros (Título, Autor, ISBN, Género, Fecha_publicación, Número_páginas, Editorial, Idioma, Resumen, Disponibilidad)
+        INSERT INTO Libros (Título, ID_autor, ISBN, Género, Fecha_publicación, Número_páginas, Editorial, Idioma, Resumen, Disponibilidad)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
-        cursor.execute(query, (data['Título'], data['Autor'], data['ISBN'], data['Género'], data['Fecha_publicación'], data['Número_páginas'], data['Editorial'], data['Idioma'], data['Resumen'], data['Disponibilidad']))
+        cursor.execute(query, (data['Título'], data['ID_autor'], data['ISBN'], data['Género'], data['Fecha_publicación'], data['Número_páginas'], data['Editorial'], data['Idioma'], data['Resumen'], data['Disponibilidad']))
         db.commit()
 
         return jsonify({'message': 'Libro creado exitosamente'}), 201
@@ -87,13 +88,15 @@ def update_libro(id):
     try:
         data = request.get_json()
 
-        if not data or not all(key in data for key in ('Título', 'Autor', 'ISBN', 'Género', 'Fecha_publicación', 'Número_páginas', 'Editorial', 'Idioma', 'Resumen', 'Disponibilidad')):
+        if not data or not all(key in data for key in ('Título', 'ID_autor', 'ISBN', 'Género', 'Fecha_publicación', 'Número_páginas', 'Editorial', 'Idioma', 'Resumen', 'Disponibilidad')):
             return jsonify({"error": "Todos los campos son obligatorios"}), 400
 
         query = """
-        UPDATE Libros SET Título=%s, Autor=%s, ISBN=%s, Género=%s, Fecha_publicación=%s, Número_páginas=%s, Editorial=%s, Idioma=%s, Resumen=%s, Disponibilidad=%s WHERE ID_libro=%s
+        UPDATE Libros 
+        SET Título=%s, ID_autor=%s, ISBN=%s, Género=%s, Fecha_publicación=%s, Número_páginas=%s, Editorial=%s, Idioma=%s, Resumen=%s, Disponibilidad=%s 
+        WHERE ID_libro=%s
         """
-        cursor.execute(query, (data['Título'], data['Autor'], data['ISBN'], data['Género'], data['Fecha_publicación'], data['Número_páginas'], data['Editorial'], data['Idioma'], data['Resumen'], data['Disponibilidad'], id))
+        cursor.execute(query, (data['Título'], data['ID_autor'], data['ISBN'], data['Género'], data['Fecha_publicación'], data['Número_páginas'], data['Editorial'], data['Idioma'], data['Resumen'], data['Disponibilidad'], id))
         db.commit()
 
         return jsonify({'message': 'Libro actualizado exitosamente'}), 200
@@ -110,13 +113,12 @@ def delete_libro(id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-### CRUD para la tabla "Autores" ###
+### CRUD para la tabla "Autor" ###
 
 # Obtener todos los autores
 @app.route('/autores', methods=['GET'])
 def get_autores():
-    cursor.execute("SELECT * FROM Autores")
+    cursor.execute("SELECT * FROM Autor")
     autores = cursor.fetchall()
     result = []
     for row in autores:
@@ -132,7 +134,7 @@ def get_autores():
 # Obtener un autor por su ID
 @app.route('/autores/<int:id>', methods=['GET'])
 def get_autor(id):
-    cursor.execute("SELECT * FROM Autores WHERE ID_autor = %s", (id,))
+    cursor.execute("SELECT * FROM Autor WHERE ID_autor = %s", (id,))
     autor = cursor.fetchone()
     if autor:
         result = {
@@ -155,7 +157,7 @@ def create_autor():
             return jsonify({"error": "Todos los campos son obligatorios"}), 400
 
         query = """
-        INSERT INTO Autores (Nombre, Fecha_nacimiento, Nacionalidad, Biografía)
+        INSERT INTO Autor (Nombre, Fecha_nacimiento, Nacionalidad, Biografía)
         VALUES (%s, %s, %s, %s)
         """
         cursor.execute(query, (data['Nombre'], data['Fecha_nacimiento'], data['Nacionalidad'], data['Biografía']))
@@ -175,7 +177,9 @@ def update_autor(id):
             return jsonify({"error": "Todos los campos son obligatorios"}), 400
 
         query = """
-        UPDATE Autores SET Nombre=%s, Fecha_nacimiento=%s, Nacionalidad=%s, Biografía=%s WHERE ID_autor=%s
+        UPDATE Autor 
+        SET Nombre=%s, Fecha_nacimiento=%s, Nacionalidad=%s, Biografía=%s 
+        WHERE ID_autor=%s
         """
         cursor.execute(query, (data['Nombre'], data['Fecha_nacimiento'], data['Nacionalidad'], data['Biografía'], id))
         db.commit()
@@ -188,20 +192,50 @@ def update_autor(id):
 @app.route('/autores/<int:id>', methods=['DELETE'])
 def delete_autor(id):
     try:
-        cursor.execute("DELETE FROM Autores WHERE ID_autor=%s", (id,))
+        cursor.execute("DELETE FROM Autor WHERE ID_autor=%s", (id,))
         db.commit()
         return jsonify({'message': 'Autor eliminado exitosamente'}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Ruta base para verificar si el servidor está funcionando
-@app.route('/')
-def base():
-    return Response(response=json.dumps({"Status": "UP"}),
-                    status=200,
-                    mimetype='application/json')
+### Relaciones entre APIs ###
 
+# Obtener valoraciones de un libro
+@app.route('/libros/<int:id>/valoraciones', methods=['GET'])
+def get_valoraciones_libro(id):
+    cursor.execute("""
+    SELECT v.ID_valoracion, c.Nombre, c.Apellido, v.Puntuacion 
+    FROM Valoraciones v 
+    JOIN Clientes c ON v.ID_cliente = c.ID_cliente 
+    WHERE v.ID_libro = %s
+    """, (id,))
+    valoraciones = cursor.fetchall()
+    result = []
+    for row in valoraciones:
+        result.append({
+            'ID_valoracion': row[0],
+            'Nombre_cliente': f"{row[1]} {row[2]}",
+            'Puntuacion': row[3]
+        })
+    return jsonify(result), 200
+
+# Obtener reservas de un libro
+@app.route('/libros/<int:id>/reservas', methods=['GET'])
+def get_reservas_libro(id):
+    cursor.execute("""
+    SELECT r.ID_reserva, c.Nombre, c.Apellido 
+    FROM Reservas r 
+    JOIN Clientes c ON r.ID_cliente = c.ID_cliente 
+    WHERE r.ID_libro = %s
+    """, (id,))
+    reservas = cursor.fetchall()
+    result = []
+    for row in reservas:
+        result.append({
+            'ID_reserva': row[0],
+            'Nombre_cliente': f"{row[1]} {row[2]}"
+        })
+    return jsonify(result), 200
 
 if __name__ == '__main__':
-    app.run(debug=True)
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(debug=True, host='0.0.0.0', port=8080)
