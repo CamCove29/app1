@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 # Configuración de la conexión a MySQL
 db = mysql.connector.connect(
-    host="100.27.62.167",
+    host="54.209.163.69",
     user="root",
     password="utec",
     database="db_books",
