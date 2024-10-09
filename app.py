@@ -9,7 +9,7 @@ db = mysql.connector.connect(
     user="root",
     password="utec",
     database="db_books",
-    port="8080"
+    port="8005"
 )
 
 # Crear un cursor global
