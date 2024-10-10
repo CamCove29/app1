@@ -7,7 +7,7 @@ from typing import List, Optional
 app = FastAPI()
 
 # Configuración de la conexión a MySQL
-host_name = "54.224.61.132"
+host_name = "3.85.121.200"
 port_number = "8005"
 user_name = "root"
 password_db = "utec"
