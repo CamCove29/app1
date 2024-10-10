@@ -17,6 +17,11 @@ cursor = db.cursor()
 
 ### CRUD para la tabla "Libros" ###
 
+# Get echo test for load balancer's health check
+@app.get("/")
+def get_echo_test():
+    return {"message": "Echo Test OK"}
+
 # Obtener todos los libros
 @app.route('/libros', methods=['GET'])
 def get_libros():
